@@ -32,11 +32,15 @@ local/arpa2G.sh $lm data/lang_test data/lang_test
 
 # for decoding using bigger LM let's find which interpolated gave the most improvement
 [ -d data/lang_big ] && rm -rf data/lang_big
-cp -R data/lang data/lang_big
-lm=$(cat data/srilm_interp/perplexities.txt | head -n1 | awk '{print $1}')
-local/arpa2G.sh $lm data/lang_big data/lang_big
+
+lms="lm.0.2.gz lm.0.3.gz lm.0.4.gz lm.0.5.gz lm.0.6.gz lm.0.7.gz lm.0.8.gz lm.0.9.gz "
+for lm in ${lms}; do
+affix=$lm | sed 's/.*lm.0.\([0-9]*\).*/\1/g'
+cp -R data/lang data/lang_big$affix
+local/arpa2G.sh $lm data/lang_big$affix data/lang_big$affix
 
 # for really big lm, we should only decode using small LM
 # and resocre using the big lm
-utils/build_const_arpa_lm.sh $lm data/lang_big data/lang_big
+utils/build_const_arpa_lm.sh $lm data/lang_big$affix data/lang_big$affix
+done
 exit 0;
